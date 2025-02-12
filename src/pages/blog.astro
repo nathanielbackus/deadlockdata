@@ -1,6 +1,17 @@
-<a href="/">Home</a>
-<a href="/about/">About</a>
-<a href="/blog/">blog</a>
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlogPost from '../components/BlogPost.astro';
+import HeroStats from '../components/HeroStats.astro';
 
-<h1>blog</h1>
-<h2>blog</h2>
+const allPosts = Object.values(import.meta.glob('./posts/*.md', {eager: true}));
+const pageTitle = "Hero Win/Loss Statistics";
+const response = await fetch('https://analytics.deadlock-api.com/v2/hero-win-loss-stats');
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <h2>Welcome to Deadlock Hero Stats</h2>
+  <p>Check out the latest hero win/loss statistics.</p>
+  <HeroStats />
+</BaseLayout>
+
+      <!-- {allPosts.map((post: any) => <BlogPost url={post.url} title = {post.frontmatter.title} />)} -->

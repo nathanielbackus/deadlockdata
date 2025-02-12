@@ -1,0 +1,55 @@
+---
+// filepath: /c:/deadlockdata/src/components/HeroStats.astro
+import { heroNames } from './heroNames.mjs';
+
+
+let heroStats = [];
+let error = null;
+
+try {
+  const response = await fetch('https://analytics.deadlock-api.com/v2/hero-win-loss-stats');
+  if (!response.ok) throw new Error("Failed to fetch data");
+
+  const data = await response.json();
+
+  // Ensure `data` is an array
+  heroStats = Array.isArray(data) ? data : [];
+} catch (err) {
+  error = err;
+}
+---
+
+<h2>All Heroes Win/Loss Statistics</h2>
+
+{error ? (
+  <p style="color: red;">Error: {error}</p>
+) : heroStats.length > 0 ? (
+  <table>
+    <thead>
+      <tr>
+        <th>Hero Name</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Matches</th>
+        <th>Total Kills</th>
+        <th>Total Deaths</th>
+        <th>Total Assists</th>
+      </tr>
+    </thead>
+    <tbody>
+      {heroStats.map((hero) => (
+        <tr>
+          <td>{heroNames[hero.hero_id] || `Unknown Hero (${hero.hero_id})`}</td>
+          <td>{hero.wins}</td>
+          <td>{hero.losses}</td>
+          <td>{hero.matches}</td>
+          <td>{hero.total_kills}</td>
+          <td>{hero.total_deaths}</td>
+          <td>{hero.total_assists}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+) : (
+  <p>No data available</p>
+)}
