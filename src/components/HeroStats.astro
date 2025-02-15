@@ -1,10 +1,9 @@
 ---
-// filepath: /c:/deadlockdata/src/components/HeroStats.astro
 import { heroNames } from './heroNames.mjs';
-
 
 let heroStats = [];
 let error = null;
+let sortOrder = 'asc'; // Default sort order
 
 try {
   const response = await fetch('https://analytics.deadlock-api.com/v2/hero-win-loss-stats');
@@ -12,10 +11,19 @@ try {
 
   const data = await response.json();
 
-  // Ensure `data` is an array
   heroStats = Array.isArray(data) ? data : [];
 } catch (err) {
   error = err;
+}
+
+function winrate(wins, matches) {
+  const rate = (wins / matches) * 100;
+  return `${rate.toFixed(2)}%`;
+}
+
+function pickrate(matches, allMatches) {
+  const rate = (matches / allMatches) * 100;
+  return `${rate.toFixed(2)}%`;
 }
 ---
 
@@ -24,32 +32,31 @@ try {
 {error ? (
   <p style="color: red;">Error: {error}</p>
 ) : heroStats.length > 0 ? (
-  <table>
+  <table class ="table">
     <thead>
       <tr>
-        <th>Hero Name</th>
-        <th>Wins</th>
-        <th>Losses</th>
-        <th>Matches</th>
-        <th>Total Kills</th>
-        <th>Total Deaths</th>
-        <th>Total Assists</th>
+        <th>Hero</th>
+        <th onClick={() => sortStats('wins')}>Winrate</th>
+        <th onClick={() => sortStats('matches')}>Pickrate</th>
+        <th>Weak Against</th>
       </tr>
     </thead>
     <tbody>
       {heroStats.map((hero) => (
-        <tr>
-          <td>{heroNames[hero.hero_id] || `Unknown Hero (${hero.hero_id})`}</td>
-          <td>{hero.wins}</td>
-          <td>{hero.losses}</td>
-          <td>{hero.matches}</td>
-          <td>{hero.total_kills}</td>
-          <td>{hero.total_deaths}</td>
-          <td>{hero.total_assists}</td>
+        <tr key={hero.hero_id}>
+          <td>
+            <a href={`/heroes/${hero.hero_id}`}>
+              {heroNames[hero.hero_id] || `Unknown Hero (${hero.hero_id})`}
+            </a>
+          </td>
+          <td>{winrate(hero.wins, hero.matches)}</td>
+          <td>{pickrate(hero.matches, heroStats.reduce((acc, h) => acc + h.matches, 0))}</td>
+          <td>extra data</td>
         </tr>
       ))}
     </tbody>
   </table>
+  <script src = "./src/tablesort.js"></script>
 ) : (
   <p>No data available</p>
 )}

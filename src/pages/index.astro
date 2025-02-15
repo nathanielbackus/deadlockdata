@@ -1,8 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Leaderboard from '../components/Leaderboard.jsx';
+const response = await fetch("http://localhost:4321/fetchLeaderboard");
+const result = await response.json();
+
+console.log("🔥 API Response:", result);
+
+const leaderboardData = result.data || [];
+const cacheSource = result.source;
 const pageTitle = "Home Page";
 ---
 <BaseLayout pageTitle={pageTitle}>
-  <h2>My awesome blog subtitle</h2>
+  <h1>Leaderboard</h1>
+  <p>Data Source: {cacheSource === "redis" ? "Redis Cache" : "MySQL"}</p>
+
+  <ul>
+    {leaderboardData.map((player) => (
+      <li key={player.account_id}>
+        {player.account_id}: {((player.wins / player.matches_played) * 100).toFixed(2)}% Win Rate
+      </li>
+    ))}
+  </ul>
 </BaseLayout>
-</html>

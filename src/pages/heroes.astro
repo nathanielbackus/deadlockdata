@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroStats from '../components/HeroStats.astro';
+
+const pageTitle = "Hero Win/Loss Statistics";
+const response = await fetch('https://analytics.deadlock-api.com/v2/hero-win-loss-stats');
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <HeroStats />
+</BaseLayout>
