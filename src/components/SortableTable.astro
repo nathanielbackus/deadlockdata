@@ -1,7 +1,7 @@
 ---
 const { data } = Astro.props;
 ---
-
+<script src="/public/scripts/tableSort.js" is:inline></script>
 <table id="leaderboard">
   <thead>
     <tr>
@@ -22,11 +22,6 @@ const { data } = Astro.props;
     ))}
   </tbody>
 </table>
-
-<script>
-    import "../scripts/tableSort.js"
-</script>
-
 <style>
   table {
     width: 100%;
