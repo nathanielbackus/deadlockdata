@@ -5,9 +5,9 @@ import SortableTable from "../components/SortableTable.astro";
 let leaderboardData = [];
 let error = null;
 
-const response = await fetch(
-  "http://localhost:5333/fetchLeaderboard?start=1&limit=100"
-);
+const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5333";
+
+const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100`);
 
 const text = await response.text();
 
