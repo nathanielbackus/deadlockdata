@@ -12,7 +12,7 @@ export default function Leaderboard() {
         console.log("3");
 
       try {
-        const response = await fetch("http://localhost:4321/fetchLeaderboard?start=0&limit=10");
+        const response = await fetch("http://localhost:5333/fetchLeaderboard?start=0&limit=10");
         const result = await response.json();
 
         console.log(result.source === "redis"

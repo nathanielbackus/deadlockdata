@@ -1,0 +1,49 @@
+---
+// filepath: /c:/deadlockdata/src/pages/index.astro
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+let leaderboardData = [];
+let error = null;
+
+const response = await fetch(
+  "http://localhost:5333/fetchLeaderboard?start=1&limit=100",
+);
+
+const text = await response.text(); // Log raw response before JSON parsing
+
+const result = JSON.parse(text); // Manually parse JSON
+leaderboardData = result.results || result.data || []; // Check different keys
+
+const pageTitle = "All Hero Statistics";
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  {
+    error ? (
+      <p style="color: red;">Error: {error}</p>
+    ) : (
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Account ID</th>
+            <th>Wins</th>
+            <th>Matches Played</th>
+            <th>Win Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaderboardData.map((player) => (
+            <tr key={player.account_id}>
+              <td>{player.account_id}</td>
+              <td>{player.wins}</td>
+              <td>{player.matches_played}</td>
+              <td>
+                {((player.wins / player.matches_played) * 100).toFixed(2)}%
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
+</BaseLayout>

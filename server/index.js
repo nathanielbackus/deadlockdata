@@ -1,76 +1,80 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-require("dotenv").config();
-const db = require("./database");
-const redisClient = require("./redisClient");
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+require('dotenv').config();
+const db = require('./database');
+const redisClient = require('./redisClient');
 
 // Express Server Setup
 const app = express();
-const port = 4321;
+const port = process.env.PORT || 5333;
 
 app.use(express.json());
 app.use(cors({ origin: "*", methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization"] }));
 
-// Check MySQL Connection on Startup
-async function testMySQLConnection() {
-    try {
-        const [rows] = await db.execute("SELECT 1");
-        console.log("✅ MySQL Connected Successfully!");
-    } catch (err) {
-        console.error("❌ MySQL Connection Failed:", err);
-    }
-}
-
 // Server status endpoint
 app.get("/", (req, res) => {
-    res.send("✅ Server is Up!");
+    res.send("Server is Up");
 });
 
 // Fetch Leaderboard with Redis Caching
-app.get("/fetchLeaderboard", async (req, res) => {
+app.get('/fetchLeaderboard', async (req, res) => {
     const { start, limit } = req.query;
+  
+    // Convert start and limit to integers (default to 0 and 10 if not provided)
     const startInt = parseInt(start) || 0;
     const limitInt = parseInt(limit) || 10;
-
+  
+    // Validate query params to ensure they are non-negative
     if (startInt < 0 || limitInt <= 0) {
-        return res.status(400).json({ error: "Invalid start or limit value" });
+        return res.status(400).json({ error: 'Invalid start or limit value' });
     }
-
-    const cacheKey = `leaderboard:${startInt}:${limitInt}`;
-
+  
+    const cacheKey = `leaderboard:${startInt}:${limitInt}`; // Cache key based on start and limit
+  
     try {
-        redisClient.get(cacheKey, async (err, cachedData) => {
-            if (err) console.error("❌ Redis Error:", err);
-            
-            if (cachedData) {
-                console.log("🔥 Cache Hit: Data fetched from Redis");
-                return res.json({ source: "redis", data: JSON.parse(cachedData) });
-            }
+        // Check if the data is in Redis cache
+        const cachedData = await redisClient.get(cacheKey); // Using async/await with Redis
 
-            console.log("❌ Cache Miss: Fetching from MySQL...");
+        if (cachedData) {
+            // If data is in cache, return it
+            console.log('Cache Hit, data fetched from Redis server');
+            return res.json({ data: JSON.parse(cachedData) });
+        } else {
+            // If data is not in cache, query the database
             const query = `
-                SELECT account_id, region_mode, leaderboard_rank, wins, matches_played, 
+                SELECT account_id, region_mode, leaderboard_rank, wins, matches_played,
                        kills, deaths, assists, ranked_badge_level, ranked_rank, ranked_subrank
                 FROM player_stats
-                LIMIT ? OFFSET ?;
+                LIMIT ${db.escape(limitInt)} OFFSET ${db.escape(startInt)};
             `;
-            const [rows] = await db.execute(query, [limitInt, startInt]);
-
-            redisClient.set(cacheKey, JSON.stringify(rows), "EX", 3600);
-
-            res.json({ source: "mysql", data: rows });
-        });
+  
+            // Execute query
+            db.execute(query, async (err, rows, fields) => {
+                if (err) {
+                    console.error('Error retrieving data:', err);
+                    return res.status(500).json({ error: 'Error retrieving data from database' });
+                }
+  
+  
+                // Cache the result in Redis for 1 hour (3600 seconds)
+                console.log('Cache Miss, data fetched from MYSQL server');
+                await redisClient.set(cacheKey, JSON.stringify(rows));
+  
+                // Send the result back as JSON
+                res.json({ data: rows });
+            });
+        }
     } catch (err) {
-        console.error("🚨 Internal server error:", err);
-        res.status(500).json({ error: "Internal server error" });
+        console.error('Internal server error:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
-});
+  });
 
 // Store Leaderboard Data from External API
-app.get("/storeLeaderboard", async (req, res) => {
+app.get('/storeLeaderboard', async (req, res) => {
     try {
-        const response = await axios.get("https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=1000");
+        const response = await axios.get('https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=1000');
         const data = response.data;
 
         for (const player of data) {
@@ -100,21 +104,18 @@ app.get("/storeLeaderboard", async (req, res) => {
             try {
                 await db.execute(query, values);
             } catch (err) {
-                console.error("❌ Error inserting data for account_id:", player.account_id, err);
+                console.error('Error inserting data for account_id:', player.account_id, err);
             }
         }
 
-        res.send("✅ Data stored successfully");
+        res.send('Data stored successfully');
     } catch (error) {
-        console.error("🚨 Error fetching API data:", error);
-        res.status(500).json({ error: "Failed to fetch leaderboard data." });
+        console.error('Error fetching API data:', error);
+        res.status(500).json({ error: 'Failed to fetch leaderboard data.' });
     }
 });
 
 // Start Server
 app.listen(port, async () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
-
-    // Confirm MySQL Connection when Server Starts
-    await testMySQLConnection();
+    console.log(`Node/Express Server is Up......\nPort: localhost:${port}`);
 });
