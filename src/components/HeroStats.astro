@@ -45,7 +45,7 @@ function pickrate(matches, allMatches) {
       {heroStats.map((hero) => (
         <tr key={hero.hero_id}>
           <td>
-            <a href={`/heroes/${hero.hero_id}`}>
+            <a href={`/heroes/${heroNames[hero.hero_id]}`}>
               {heroNames[hero.hero_id] || `Unknown Hero (${hero.hero_id})`}
             </a>
           </td>

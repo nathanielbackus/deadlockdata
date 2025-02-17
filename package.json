@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
-    "@rollup/rollup-linux-x64-gnu": "^2.59.0",
     "astro": "^5.1.1",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
@@ -21,5 +20,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "rollup": "^3.0.0"
   }
 }
