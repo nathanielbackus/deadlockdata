@@ -5,4 +5,4 @@ Astro JS framework web application presenting data relevant to Deadlock characte
 Data is retrieved from deadlock-api and stored in MySQL on first retrieval. This stored data is cached and retrieved with Redis.
 
 
-#deadlockdata.gg
+# deadlockdata.gg
