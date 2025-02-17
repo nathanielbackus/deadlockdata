@@ -36,9 +36,9 @@ function pickrate(matches, allMatches) {
     <thead>
       <tr>
         <th>Hero</th>
-        <th onClick={() => sortStats('wins')}>Winrate</th>
-        <th onClick={() => sortStats('matches')}>Pickrate</th>
-        <th>Weak Against</th>
+        <th>Winrate</th>
+        <th>Pickrate</th>
+        <th>Best Against</th>
       </tr>
     </thead>
     <tbody>
@@ -51,12 +51,12 @@ function pickrate(matches, allMatches) {
           </td>
           <td>{winrate(hero.wins, hero.matches)}</td>
           <td>{pickrate(hero.matches, heroStats.reduce((acc, h) => acc + h.matches, 0))}</td>
-          <td>extra data</td>
+          <td>best matchup</td>
         </tr>
       ))}
     </tbody>
   </table>
-  <script src = "./src/tablesort.js"></script>
+  // <script src = "./src/tablesort.js"></script>
 ) : (
   <p>No data available</p>
 )}
