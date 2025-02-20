@@ -5,6 +5,7 @@ import SortableTable from "../components/SortableTable.astro";
 let leaderboardData = [];
 let error = null;
 
+//make our own freaking api hosted on a vps to use this. then delete this file from github
 const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5333";
 
 const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100`);
@@ -28,3 +29,4 @@ const pageTitle = "Top 100 Players";
     <SortableTable data={leaderboardData} />
   )}
 </BaseLayout>
+

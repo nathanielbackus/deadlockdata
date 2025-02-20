@@ -74,41 +74,54 @@ app.get('/fetchLeaderboard', async (req, res) => {
 // Store Leaderboard Data from External API
 app.get('/storeLeaderboard', async (req, res) => {
     try {
+        console.log('Fetching leaderboard data from API...');
         const response = await axios.get('https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=1000');
         const data = response.data;
 
-        for (const player of data) {
-            const query = `
-                INSERT INTO player_stats (account_id, region_mode, leaderboard_rank, wins, matches_played, kills, deaths, assists, ranked_badge_level, ranked_rank, ranked_subrank)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                wins = VALUES(wins), matches_played = VALUES(matches_played), kills = VALUES(kills), deaths = VALUES(deaths), 
-                assists = VALUES(assists), ranked_badge_level = VALUES(ranked_badge_level), ranked_rank = VALUES(ranked_rank), 
-                ranked_subrank = VALUES(ranked_subrank);
-            `;
+        if (!Array.isArray(data) || data.length === 0) {
+            return res.status(400).json({ error: 'No leaderboard data received' });
+        }
 
+        console.log('Received leaderboard data:', data.length, 'entries');
+
+        const query = `
+            INSERT INTO player_stats (account_id, region_mode, leaderboard_rank, wins, matches_played, kills, deaths, assists, ranked_badge_level, ranked_rank, ranked_subrank)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+            wins = VALUES(wins), 
+            matches_played = VALUES(matches_played), 
+            kills = VALUES(kills), 
+            deaths = VALUES(deaths), 
+            assists = VALUES(assists), 
+            ranked_badge_level = VALUES(ranked_badge_level), 
+            ranked_rank = VALUES(ranked_rank), 
+            ranked_subrank = VALUES(ranked_subrank);
+        `;
+
+        for (const player of data) {
             const values = [
-                player.account_id,
-                player.region_mode,
-                player.leaderboard_rank,
-                player.wins,
-                player.matches_played,
-                player.kills,
-                player.deaths,
-                player.assists,
-                player.ranked_badge_level,
-                player.ranked_rank,
-                player.ranked_subrank
+                player.account_id || 0,
+                player.region_mode || 'unknown',
+                player.leaderboard_rank || 0,
+                player.wins || 0,
+                player.matches_played || 0,
+                player.kills || 0,
+                player.deaths || 0,
+                player.assists || 0,
+                player.ranked_badge_level || 0,
+                player.ranked_rank || 'unknown',
+                player.ranked_subrank || 'unknown'
             ];
 
             try {
-                await db.execute(query, values);
+                await db.promise().execute(query, values);
             } catch (err) {
                 console.error('Error inserting data for account_id:', player.account_id, err);
             }
         }
 
-        res.send('Data stored successfully');
+        console.log('Data stored successfully');
+        res.json('Data stored successfully');
     } catch (error) {
         console.error('Error fetching API data:', error);
         res.status(500).json({ error: 'Failed to fetch leaderboard data.' });
