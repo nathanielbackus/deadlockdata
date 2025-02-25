@@ -1,17 +1,21 @@
 html {
-  background-color: #f1f5f9;
-  font-family: sans-serif;
-}
 
-body {
-  margin: 0 auto;
-  width: 100%;
-  max-width: 80ch;
-  line-height: 1.5;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: #202020;
+}
+
+body {
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 135ch;
+  margin: auto;
 }
 
 h1 {
@@ -19,7 +23,6 @@ h1 {
   font-size: 2.5rem;
 }
 
-/* nav styles */
 .hamburger {
   padding-right: 20px;
   cursor: pointer;
@@ -32,6 +35,31 @@ h1 {
   margin-bottom: 10px;
   background-color: #ff9776;
 }
+
+header {
+  background-color: #202020;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: auto;
+  max-width: 135ch;
+}
+
+.steam {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  padding: 10px 0;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #5b5774;
+  color: #f1f5f9;
+}
+
 
 .nav-links {
   width: 100%;
