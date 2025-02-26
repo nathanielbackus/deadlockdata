@@ -40,6 +40,19 @@ header {
   background-color: #202020;
 }
 
+.logo {
+  justify-content: space-between;
+  display: block;
+  margin: auto;
+  align-items: center;
+  text-align: center;
+  padding: 10px 0;
+  text-decoration: none;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -48,26 +61,13 @@ header {
   max-width: 135ch;
 }
 
-.steam {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  padding: 10px 0;
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: bold;
-  background-color: #5b5774;
-  color: #f1f5f9;
-}
-
-
 .nav-links {
   width: 100%;
   top: 5rem;
   left: 48px;
   background-color: #ff9776;
   display: none;
-  margin: 0;
+  margin: auto;
 }
 
 .nav-links a {
@@ -83,6 +83,11 @@ header {
 
 .nav-links a:hover, a:focus {
   background-color: #235c57;
+}
+
+.page-divider {
+  border: 2px solid #ddd;
+  margin: 20px 0;
 }
 
 .expanded {

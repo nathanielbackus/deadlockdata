@@ -28,27 +28,7 @@ const { pageTitle } = Astro.props;
     <title>{pageTitle}</title>
   </head>
   <body>
-    <header>
-      <nav class="navbar">
-        <ul class="nav-links">
-          <a class="logo" href="/">DEADLOCKDATA</a>
-          <a href="/meta">Meta</a>
-          <a href="/trends">Trends</a>
-          <a href="/matches">Matches</a>
-          <a href="/leaderboard">Leaderboard</a>
-        </ul>
-        <a class="steam" href="/players">
-          <img
-            src="/src/steam_logo.png"
-            alt="Steam Logo"
-            width="25"
-            height="20"
-            style="display: block; padding-right: 5px;"
-          />
-          <span>PlayerSteamName</span>
-        </a>
-      </nav>
-    </header>
+    <Header />
     <div class="container">
       <h1>{pageTitle}</h1>
       <slot />
