@@ -1,3 +1,5 @@
+//TODO PUSH TO DROPLET
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -30,38 +32,31 @@ app.get('/fetchLeaderboard', async (req, res) => {
         return res.status(400).json({ error: 'Invalid start or limit value' });
     }
   
-    const cacheKey = `leaderboard:${startInt}:${limitInt}`; // Cache key based on start and limit
+    const region = req.query.region || 'all';
+    const cacheKey = `leaderboard:${startInt}:${limitInt}:${region}`;
   
     try {
-        // Check if the data is in Redis cache
-        const cachedData = await redisClient.get(cacheKey); // Using async/await with Redis
+        const cachedData = await redisClient.get(cacheKey);
 
         if (cachedData) {
-            // If data is in cache, return it
             console.log('Cache Hit, data fetched from Redis server');
             return res.json({ data: JSON.parse(cachedData) });
         } else {
-            // If data is not in cache, query the database
             const query = `
-                SELECT account_id, region_mode, leaderboard_rank, wins, matches_played,
-                       kills, deaths, assists, ranked_badge_level, ranked_rank, ranked_subrank
-                FROM player_stats
+                SELECT * FROM player_stats
+                ${region !== 'all' ? `WHERE region_mode = ${db.escape(region)}` : ''}
                 LIMIT ${db.escape(limitInt)} OFFSET ${db.escape(startInt)};
             `;
   
-            // Execute query
             db.execute(query, async (err, rows, fields) => {
                 if (err) {
                     console.error('Error retrieving data:', err);
                     return res.status(500).json({ error: 'Error retrieving data from database' });
                 }
   
-  
-                // Cache the result in Redis for 1 hour (3600 seconds)
                 console.log('Cache Miss, data fetched from MYSQL server');
                 await redisClient.set(cacheKey, JSON.stringify(rows));
   
-                // Send the result back as JSON
                 res.json({ data: rows });
             });
         }
@@ -71,11 +66,10 @@ app.get('/fetchLeaderboard', async (req, res) => {
     }
   });
 
-// Store Leaderboard Data from External API
 app.get('/storeLeaderboard', async (req, res) => {
     try {
         console.log('Fetching leaderboard data from API...');
-        const response = await axios.get('https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=1000');
+        const response = await axios.get('https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=10000');
         const data = response.data;
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -128,7 +122,6 @@ app.get('/storeLeaderboard', async (req, res) => {
     }
 });
 
-// Start Server
 app.listen(port, async () => {
     console.log(`Node/Express Server is Up......\nPort: localhost:${port}`);
 });

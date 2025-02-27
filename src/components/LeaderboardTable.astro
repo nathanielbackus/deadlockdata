@@ -2,14 +2,18 @@
 const { data } = Astro.props;
 
 let leaderboardData = [];
-let filderedLeaderboard = [];
-let selectedRegion = "All";
 let error = null;
+let Region = "all";
+if (typeof window !== "undefined") {
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log("URL PARAMS: " + urlParams);
+  Region = urlParams.get("region") || "all";
+}
 
 const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5333";
 
-const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100`);
-
+const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100&${Region}`);
+console.log(response);
 const text = await response.text();
 
 try {
@@ -18,17 +22,22 @@ try {
 } catch (err) {
   error = "Invalid JSON received from API";
 }
+
 ---
-<!-- <div class="region-selector">
-  <div class="region-selector-desc">Sort Top 100 By Region</div>
-  <select>All Regions</button>
-    <option value="SEA">SEA</option>
-    <option value="Europe">Europe</option>
-    <option value="NorthAmerica">NorthAmerica</option>
-    <option value="SouthAmerica">SouthAmerica</option>
-    <option value="Row">Row</option>
-</div> -->
 <script src="/public/scripts/tableSort.js" is:inline></script>
+<script src="/public/scripts/dropdownURLChange.js" is:inline></script>
+<div class="region-selector">
+  <div class="region-selector-desc">Sort Top 100 By Region</div>
+  <select id="regionSelector">
+    <option value="all">All</option>
+    <option value="SEAsia">SE Asia</option>
+    <option value="Europe">Europe</option>
+    <option value="SouthAmerica">South America</option>
+    <option value="Oceania">Oceania</option>
+    <option value="Russia">Russia</option>
+    <option value="Row">Rest of the World</option>
+  </select>
+</div>
 <table class="leaderboardTable" id="leaderboard">
   <thead>
     <tr>
