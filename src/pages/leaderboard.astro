@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SortableTable from "../components/SortableTable.astro";
+import steamlogo from "../images/steam_logo.png";
 
 let leaderboardData = [];
 let error = null;
@@ -21,9 +22,7 @@ try {
 
 const pageTitle = "Top 100 Players";
 ---
-<script>
-  import "../scripts/menu.js";
-</script>
+<img src="../images/steam_logo.png" alt="steam logo">
 <BaseLayout pageTitle={pageTitle}>
   {error ? (
     <p style="color: red;">Error: {error}</p>
@@ -31,4 +30,3 @@ const pageTitle = "Top 100 Players";
     <SortableTable data={leaderboardData} />
   )}
 </BaseLayout>
-

@@ -41,16 +41,19 @@ header {
 }
 
 .logo {
+  padding: 0 20px;
+  text-decoration: none;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+.logo-center {
   justify-content: space-between;
   display: block;
   margin: auto;
   align-items: center;
   text-align: center;
-  padding: 10px 0;
-  text-decoration: none;
-  font-size: 3rem;
-  font-weight: bold;
-  color: #f1f5f9;
 }
 
 .navbar {
