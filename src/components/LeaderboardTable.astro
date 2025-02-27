@@ -1,0 +1,55 @@
+---
+const { data } = Astro.props;
+
+let leaderboardData = [];
+let filderedLeaderboard = [];
+let selectedRegion = "All";
+let error = null;
+
+const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5333";
+
+const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100`);
+
+const text = await response.text();
+
+try {
+  const result = JSON.parse(text);
+  leaderboardData = result.results || result.data || [];
+} catch (err) {
+  error = "Invalid JSON received from API";
+}
+---
+<!-- <div class="region-selector">
+  <div class="region-selector-desc">Sort Top 100 By Region</div>
+  <select>All Regions</button>
+    <option value="SEA">SEA</option>
+    <option value="Europe">Europe</option>
+    <option value="NorthAmerica">NorthAmerica</option>
+    <option value="SouthAmerica">SouthAmerica</option>
+    <option value="Row">Row</option>
+</div> -->
+<script src="/public/scripts/tableSort.js" is:inline></script>
+<table class="leaderboardTable" id="leaderboard">
+  <thead>
+    <tr>
+      <th class="leaderboardTh" onclick="sortTableByColumn('leaderboard', 0)">Account ID</th>
+      <th class="leaderboardTh" onclick="sortTableByColumn('leaderboard', 1)">Wins</th>
+      <th class="leaderboardTh" onclick="sortTableByColumn('leaderboard', 2)">Matches Played</th>
+      <th class="leaderboardTh" onclick="sortTableByColumn('leaderboard', 3)">Win Rate</th>
+      <th class="leaderboardTh">Region</th>
+      <th class="leaderboardTh">Badge Rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    {leaderboardData.map(player => (
+      <tr>
+        <td class="leaderboardTd">{player.account_id}</td>
+        <td class="leaderboardTd">{player.wins}</td>
+        <td class="leaderboardTd">{player.matches_played}</td>
+        <td class="leaderboardTd">{((player.wins / player.matches_played) * 100).toFixed(2)}%</td>
+        <td class="leaderboardTd">{player.region_mode}</td>
+        <td class="leaderboardTd">{player.ranked_rank} + {player.ranked_subrank}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>

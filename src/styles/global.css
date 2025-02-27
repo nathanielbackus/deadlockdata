@@ -56,6 +56,17 @@ header {
   text-align: center;
 }
 
+.region-selector {
+  display: flex;
+  justify-content: left;
+  margin: 20px 0;
+}
+
+.region-selector-desc {
+  padding-right: 20px;
+
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -97,25 +108,23 @@ header {
   display: block;
 }
 
-.card {
-  border: 1px solid hsl(0, 0%, 80%);
-  border-radius: 10px;
-  box-shadow: 5px 5px 5px hsla(0, 0%, 0%, .01);
-  padding: 20px;
-  margin: 10px;
-  text-align: center;
-  max-width: 250px;
-  display: inline-block;
+.leaderboardTable {
+  width: 100%;
+  border-collapse: collapse;
 }
+.leaderboardTh, .leaderboardTd {
+  padding: 10px;
+  border-bottom:  1px solid #ddd;
+  text-align: left;
+  background-color: #ff9776;
 
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
 }
-
-.card a:hover, a:focus {
-  background-color: #235c57;
+.leaderboardTh {
+  background-color: #f4f4f4;
+  cursor: pointer;
+}
+.leaderboardTh:hover {
+  background-color: #ddd;
 }
 
 @media screen and (min-width: 636px) {

@@ -1,32 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import SortableTable from "../components/SortableTable.astro";
-import steamlogo from "../images/steam_logo.png";
-
-let leaderboardData = [];
-let error = null;
-
-//make our own freaking api hosted on a vps to use this. then delete this file from github
-const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5333";
-
-const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=1000`);
-
-const text = await response.text();
-
-try {
-  const result = JSON.parse(text);
-  leaderboardData = result.results || result.data || [];
-} catch (err) {
-  error = "Invalid JSON received from API";
-}
+import LeaderboardTable from "../components/LeaderboardTable.astro";
 
 const pageTitle = "Top 100 Players";
 ---
-<img src="../images/steam_logo.png" alt="steam logo">
 <BaseLayout pageTitle={pageTitle}>
-  {error ? (
-    <p style="color: red;">Error: {error}</p>
-  ) : (
-    <SortableTable data={leaderboardData} />
-  )}
+<LeaderboardTable />
 </BaseLayout>
