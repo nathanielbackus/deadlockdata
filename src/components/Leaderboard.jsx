@@ -27,7 +27,7 @@ export default function Leaderboard({ initialRegion }) {
 
     useEffect(() => {
         const script = document.createElement("script");
-        script.src = "/public/scripts/tableSort.js";
+        script.src = "/scripts/tableSort.js";
         script.async = true;
         script.onload = () => {
             document.querySelectorAll(".leaderboardTh").forEach((th, index) => {
