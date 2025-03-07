@@ -21,38 +21,56 @@ export default function Leaderboard({ initialRegion }) {
   }, [region]);
 
   function handleRegionChange(event) {
-    const newRegion = event.target.value;
-    setRegion(newRegion);
+    setRegion(event.target.value);
   }
 
-  useEffect(() => {
-    function sortTableByColumn(tableId, columnIndex) {
-      const table = document.getElementById(tableId);
-      const tbody = table.querySelector("tbody");
-      const rows = Array.from(tbody.querySelectorAll("tr"));
-      const currentOrder = table.getAttribute(`data-sort-${columnIndex}`) || "asc";
-      const newOrder = currentOrder === "asc" ? "desc" : "asc";
-      rows.sort((rowA, rowB) => {
-        const cellA = rowA.children[columnIndex].textContent.trim();
-        const cellB = rowB.children[columnIndex].textContent.trim();
-        const comparison = isNaN(cellA) || isNaN(cellB)
-          ? cellA.localeCompare(cellB)
-          : parseFloat(cellA) - parseFloat(cellB);
+  function sortTableByColumn(tableId, columnIndex) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    // current sort for this column (default to asc)
+    const currentOrder = table.getAttribute(`data-sort-${columnIndex}`) || "asc";
+    // toggle
+    const newOrder = currentOrder === "asc" ? "desc" : "asc";
+    // sort
+    rows.sort((rowA, rowB) => {
+      const cellA = rowA.children[columnIndex].textContent.trim();
+      const cellB = rowB.children[columnIndex].textContent.trim();
+      // define values of whats to be compared
+      const numericA = parseFloat(cellA);
+      const numericB = parseFloat(cellB);
+      const isNumeric = !isNaN(numericA) && !isNaN(numericB);
+      // if numeric is true, make new order changed when clicked
+      if (isNumeric) {
+        return newOrder === "asc" ? numericA - numericB : numericB - numericA;
+        //else, make new order when clicked for strings  
+        } else {
+        const comparison = cellA.localeCompare(cellB);
         return newOrder === "asc" ? comparison : -comparison;
-      });
-      table.setAttribute(`data-sort-${columnIndex}`, newOrder);
-      rows.forEach(row => tbody.appendChild(row));
-    }
-    document.querySelectorAll(".leaderboardTh").forEach((th, index) => {
-      th.addEventListener("click", () => sortTableByColumn("leaderboard", index));
+      }
     });
-  }, [leaderboardData]);
+    // set new order
+    table.setAttribute(`data-sort-${columnIndex}`, newOrder);
+    rows.forEach((row) => tbody.appendChild(row));
+  }
+  useEffect(() => {
+    // attach onclick listener once
+    const headers = document.querySelectorAll(".leaderboardTh");
+    headers.forEach((th, index) => {
+      th.onclick = () => sortTableByColumn("leaderboard", index);
+    });
+  }, []);
 
   return (
     <div>
       <div className="region-selector">
         <label>Sort Top 100 By Region:</label>
-        <select id="regionSelector" value={region} onChange={handleRegionChange}>
+        <select
+          id="regionSelector"
+          value={region}
+          onChange={handleRegionChange}
+        >
           <option value="all">All</option>
           <option value="Row">North America</option>
           <option value="SAmerica">South America</option>
@@ -62,7 +80,9 @@ export default function Leaderboard({ initialRegion }) {
           <option value="Russia">Russia</option>
         </select>
       </div>
+
       {error && <p className="error">{error}</p>}
+
       <table className="leaderboardTable" id="leaderboard">
         <thead>
           <tr>
