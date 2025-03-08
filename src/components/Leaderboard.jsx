@@ -29,48 +29,60 @@ export default function Leaderboard({ initialRegion }) {
     if (!table) return;
     const tbody = table.querySelector("tbody");
     const rows = Array.from(tbody.querySelectorAll("tr"));
-    // current sort for this column (default to asc)
     const currentOrder = table.getAttribute(`data-sort-${columnIndex}`) || "asc";
-    // toggle
     const newOrder = currentOrder === "asc" ? "desc" : "asc";
-    // sort
+
     rows.sort((rowA, rowB) => {
       const cellA = rowA.children[columnIndex].textContent.trim();
       const cellB = rowB.children[columnIndex].textContent.trim();
-      // define values of whats to be compared
       const numericA = parseFloat(cellA);
       const numericB = parseFloat(cellB);
       const isNumeric = !isNaN(numericA) && !isNaN(numericB);
-      // if numeric is true, make new order changed when clicked
+
       if (isNumeric) {
         return newOrder === "asc" ? numericA - numericB : numericB - numericA;
-        //else, make new order when clicked for strings  
-        } else {
+      } else {
         const comparison = cellA.localeCompare(cellB);
         return newOrder === "asc" ? comparison : -comparison;
       }
     });
-    // set new order
+
     table.setAttribute(`data-sort-${columnIndex}`, newOrder);
     rows.forEach((row) => tbody.appendChild(row));
   }
+
   useEffect(() => {
-    // attach onclick listener once
     const headers = document.querySelectorAll(".leaderboardTh");
     headers.forEach((th, index) => {
       th.onclick = () => sortTableByColumn("leaderboard", index);
     });
-  }, []);
+  }, [leaderboardData]);
+
+  function fetchPlayerData(player) {
+    const base = BigInt("76561197960265728");
+    const steam32 = BigInt(player.account_id);
+    const steam64 = steam32 + base;
+    fetch(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=0D2FD14C4AFCE0C56C3E8CA3FA7B462F&steamids=${steam64}&format=json`)
+      .then((res) => res.json())
+      .then((data) => {
+        const playerData = data.response.players[0];
+        if (!playerData) {
+          console.error("No player data returned from Steam API.");
+          return;
+        }
+        console.log("Player Name:", playerData.personaname);
+        console.log("Player Avatar:", playerData.avatar);
+        console.log("Player Full Avatar:", playerData.avatarfull);
+        console.log("Player 32-bit ID:", steam32.toString());
+      })
+      .catch((err) => console.error("Error fetching Steam data:", err));
+  }
 
   return (
     <div>
       <div className="region-selector">
         <label>Sort Top 100 By Region:</label>
-        <select
-          id="regionSelector"
-          value={region}
-          onChange={handleRegionChange}
-        >
+        <select id="regionSelector" value={region} onChange={handleRegionChange}>
           <option value="all">All</option>
           <option value="Row">North America</option>
           <option value="SAmerica">South America</option>
@@ -97,15 +109,21 @@ export default function Leaderboard({ initialRegion }) {
         <tbody>
           {leaderboardData.map((player) => (
             <tr key={player.account_id}>
-              <td className="leaderboardTd">{player.account_id}</td>
+              <td className="leaderboardTd">
+                <a href="#" onClick={() => fetchPlayerData(player)}>
+                  {player.account_id}
+                </a>
+              </td>
               <td className="leaderboardTd">{player.wins}</td>
               <td className="leaderboardTd">{player.matches_played}</td>
               <td className="leaderboardTd">{((player.wins / player.matches_played) * 100).toFixed(2)}%</td>
               <td className="leaderboardTd">
                 {player.region_mode === "Row"
                   ? "North America"
-                  : player.region_mode === "SouthAmerica"
+                  : player.region_mode === "SAmerica"
                   ? "South America"
+                  : player.region_mode === "SEAsia"
+                  ? "Southeast Asia"
                   : player.region_mode}
               </td>
               <td className="leaderboardTd">{player.ranked_rank} + {player.ranked_subrank}</td>

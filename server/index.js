@@ -66,16 +66,12 @@ app.get('/fetchLeaderboard', async (req, res) => {
 
 app.get('/storeLeaderboard', async (req, res) => {
     try {
-        console.log('Fetching leaderboard data from API...');
         const response = await axios.get('https://analytics.deadlock-api.com/v2/leaderboard?start=1&limit=10000');
         const data = response.data;
 
         if (!Array.isArray(data) || data.length === 0) {
             return res.status(400).json({ error: 'No leaderboard data received' });
         }
-
-        console.log('Received leaderboard data:', data.length, 'entries');
-
         const query = `
             INSERT INTO player_stats (account_id, region_mode, leaderboard_rank, wins, matches_played, kills, deaths, assists, ranked_badge_level, ranked_rank, ranked_subrank)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -111,8 +107,6 @@ app.get('/storeLeaderboard', async (req, res) => {
                 console.error('Error inserting data for account_id:', player.account_id, err);
             }
         }
-
-        console.log('Data stored successfully');
         res.json('Data stored successfully');
     } catch (error) {
         console.error('Error fetching API data:', error);
