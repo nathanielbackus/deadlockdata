@@ -60,7 +60,7 @@ async function fetchPlayerData(player) {
   const steam64 = steam32 + base;
   
   try {
-    const response = await fetch(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=0D2FD14C4AFCE0C56C3E8CA3FA7B462F&steamids=${steam64}&format=json`);
+    const response = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=0D2FD14C4AFCE0C56C3E8CA3FA7B462F&steamids=${steam64}&format=json`);
     
     if (!response.ok) {
       throw new Error(`Steam API error: ${response.status} ${response.statusText}`);
