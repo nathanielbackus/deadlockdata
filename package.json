@@ -10,8 +10,8 @@
     "start": "npm run server & npm run dev"
   },
   "dependencies": {
-    "@astrojs/react": "^4.2.0",
-    "astro": "^5.1.1",
+    "@astrojs/react": "^4.2.1",
+    "astro": "^5.4.2",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

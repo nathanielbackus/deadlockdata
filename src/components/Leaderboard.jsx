@@ -7,18 +7,78 @@ export default function Leaderboard({ initialRegion }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [error, setError] = useState(null);
 
+  //1. fetch the data of players
+  //2. get the data from the steam api using the account id + base
+  //3. add the players name and avatar to a new object?
+  //4. we map that new object over the leaderboard rows
+
+  //old
+  // useEffect(() => {
+  //   async function fetchLeaderboard() {
+  //     try {
+  //       const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100&region=${region}`);
+  //       const result = await response.json();
+  //       setLeaderboardData(result.results || result.data || []);
+  //     } catch (err) {
+  //       setError("Failed to load leaderboard data.");
+  //     }
+  //   }
+  //   fetchLeaderboard();
+  // }, [region]);
+
+  //new
   useEffect(() => {
-    async function fetchLeaderboard() {
-      try {
-        const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100&region=${region}`);
-        const result = await response.json();
-        setLeaderboardData(result.results || result.data || []);
-      } catch (err) {
-        setError("Failed to load leaderboard data.");
-      }
+  async function fetchLeaderboard() {
+    try {
+      const response = await fetch(`${API_URL}/fetchLeaderboard?start=1&limit=100&region=${region}`);
+      const result = await response.json();
+      const leaderboardArray = result.results || result.data || [];
+
+      // Fetch player names in parallel
+      const updatedPlayers = await Promise.all(
+        leaderboardArray.map(async (player) => {
+          const playerData = await fetchPlayerData(player);
+          return { 
+            ...player, 
+            playerName: playerData ? playerData.personaname : "Unknown Player" 
+          };
+        })
+      );
+      setLeaderboardData(updatedPlayers);
+    } catch (err) {
+      setError("Failed to load leaderboard data.");
     }
-    fetchLeaderboard();
-  }, [region]);
+  }
+  fetchLeaderboard();
+}, [region]);
+
+
+
+async function fetchPlayerData(player) {
+  const base = BigInt("76561197960265728");
+  const steam32 = BigInt(player.account_id);
+  const steam64 = steam32 + base;
+  
+  try {
+    const response = await fetch(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=0D2FD14C4AFCE0C56C3E8CA3FA7B462F&steamids=${steam64}&format=json`);
+    
+    if (!response.ok) {
+      throw new Error(`Steam API error: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    if (!data.response || !data.response.players || data.response.players.length === 0) {
+      console.warn(`No player data found for SteamID: ${steam64}`);
+      return null;
+    }
+
+    return data.response.players[0];
+  } catch (err) {
+    console.error(`Error fetching Steam data for SteamID: ${steam64} ->`, err);
+    return null;
+  }
+}
+
 
   function handleRegionChange(event) {
     setRegion(event.target.value);
@@ -58,26 +118,6 @@ export default function Leaderboard({ initialRegion }) {
     });
   }, [leaderboardData]);
 
-  function fetchPlayerData(player) {
-    const base = BigInt("76561197960265728");
-    const steam32 = BigInt(player.account_id);
-    const steam64 = steam32 + base;
-    fetch(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=0D2FD14C4AFCE0C56C3E8CA3FA7B462F&steamids=${steam64}&format=json`)
-      .then((res) => res.json())
-      .then((data) => {
-        const playerData = data.response.players[0];
-        if (!playerData) {
-          console.error("No player data returned from Steam API.");
-          return;
-        }
-        console.log("Player Name:", playerData.personaname);
-        console.log("Player Avatar:", playerData.avatar);
-        console.log("Player Full Avatar:", playerData.avatarfull);
-        console.log("Player 32-bit ID:", steam32.toString());
-      })
-      .catch((err) => console.error("Error fetching Steam data:", err));
-  }
-
   return (
     <div>
       <div className="region-selector">
@@ -110,8 +150,8 @@ export default function Leaderboard({ initialRegion }) {
           {leaderboardData.map((player) => (
             <tr key={player.account_id}>
               <td className="leaderboardTd">
-                <a href="#" onClick={() => fetchPlayerData(player)}>
-                  {player.account_id}
+                <a href={`players/${player.account_id}`}>
+                  {player.playerName} ({player.account_id})
                 </a>
               </td>
               <td className="leaderboardTd">{player.wins}</td>
